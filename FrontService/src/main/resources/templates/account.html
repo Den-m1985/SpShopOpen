@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+    xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Account</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="p-3 m-0 border-0 bd-example m-0 border-0">
+        <ul class="nav justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link" href="/">HOME</a>
+            </li>
+        </ul>
+    </div>
+
+    <h1 th:inline="text">Привет <span id="usernamePlaceholder">незнакомец</span></h1>
+    <div id="failServer" style="display: none; color: red;">
+        <h1>сервер не отвечает</h1>
+    </div>
+    <button type="button" id="loginButton" class="btn btn-light"><a href="/account/login">LOGIN</a></button>
+    <button type="button" id="registerButton" class="btn btn-light"><a href="/account/register">REGISTER</a></button>
+
+    <form onsubmit="logout()">
+        <div><input type="submit" id="logOutButton" value="ВЫЙТИ"></div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (isAccessTokenExpired()) {
+                console.log('accessToken истек');
+                updateAccessToken();
+                //window.location.reload();
+                document.getElementById('logOutButton').style.display = 'none';
+            } else {
+                // Проверяем, есть ли данные в локальном хранилище
+                var username = localStorage.getItem('username');
+                // Если есть данные, заменяем содержимое элемента на имя пользователя
+                if (username) {
+                    document.getElementById('usernamePlaceholder').innerText = username;
+                    document.getElementById('loginButton').style.display = 'none';
+                    document.getElementById('registerButton').style.display = 'none';
+                    document.getElementById('logOutButton').style.display = 'block';
+                }
+                else {
+                    document.getElementById('loginButton').style.display = 'block';
+                    document.getElementById('registerButton').style.display = 'block';
+                    //document.getElementById('logOutButton').style.display = 'none';
+                }
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+        }
+
+        function updateAccessToken() {
+            // Получение refreshToken из localStorage
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
+                //window.location.href = "/account/login";
+                console.log("отсутствует refresh token")
+                return false;
+            }
+            // Отправка запроса на обновление токена
+            fetch('http://localhost:8000/api/auth/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ refreshToken })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log("data " + data.accessToken);
+                    // если от сервера приходит null
+                    if (data.accessToken != null) {
+                        // Сохранение нового accessToken
+                        localStorage.setItem('accessToken', data.accessToken);
+                        console.log("обновлен access token")
+                    }else{
+                        console.log("access token = null")
+                    }
+                })
+                .catch(error => {
+                    console.log("не обновлен accessToken")
+                    document.getElementById("failServer").style.display = "block";
+                });
+        }
+
+        function isAccessTokenExpired() {
+            const accessToken = localStorage.getItem('accessToken');
+            if (accessToken === null || accessToken === "null" || accessToken === undefined) {
+                // Токен не существует, считаем, что он истек
+                console.log("Токен не существует");
+                return true;
+            }
+            try {
+                // Парсим токен, чтобы получить информацию о сроке действия
+                const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+                const expiryTime = tokenPayload.exp * 1000; // Переводим из секунд в миллисекунды
+                console.log("expiryTime " + expiryTime)
+                console.log("Date.now() " + Date.now())
+                // Сравниваем с текущим временем
+                return Date.now() >= expiryTime;
+            } catch (error) {
+                console.error('Ошибка при разборе токена:', error);
+                return true; // В случае ошибки считаем, что токен истек
+            }
+        }
+
+    </script>
+</body>
+
+</html>
