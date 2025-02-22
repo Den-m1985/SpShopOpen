@@ -1,0 +1,23 @@
+name: Run Tests
+
+on:
+  push:  # Запуск при push в любую ветку
+  pull_request:  # Запуск при Pull Request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # Загружаем код
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: maven
+
+      - name: Run tests
+        run: mvn test
