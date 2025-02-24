@@ -15,7 +15,7 @@ public class OnlyGoods {
     int item;
 
 
-    public List<StructureCSV> onlyGoods(List<String[]> rows) {
+    public List<StructureCSV> findOnlyGoods(List<String[]> rows) {
         reportCSV = new ArrayList<>();
         dataWithItem = new ArrayList<>();
         for (String[] row : rows) {

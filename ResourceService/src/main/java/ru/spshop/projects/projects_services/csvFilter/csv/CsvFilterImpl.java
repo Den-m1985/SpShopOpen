@@ -24,7 +24,7 @@ public class CsvFilterImpl implements CsvFilter {
 
         // В этом блоке оставляем только те колонки где есть цена и кол-во
         OnlyGoods onlyGoods = new OnlyGoods();
-        List<StructureCSV> dataWithItem = onlyGoods.onlyGoods(rows);
+        List<StructureCSV> dataWithItem = onlyGoods.findOnlyGoods(rows);
         error = onlyGoods.reportCSV();
 
         // этот блок возвращает иникальные элементы
@@ -33,7 +33,7 @@ public class CsvFilterImpl implements CsvFilter {
         List<StructureCSV> duplicateNames = uniqueGoods.getDuplicateNames();
 
         // этот блок работатет с повторяющимися именами.
-        List<StructureCSV> resolveDuplicatedNames = new DuplicateGoods().duplicateGoods(duplicateNames);
+        List<StructureCSV> resolveDuplicatedNames = new DuplicateGoods().findDuplicateGoods(duplicateNames);
         uniqueValues.addAll(resolveDuplicatedNames);
 
         return uniqueValues;
