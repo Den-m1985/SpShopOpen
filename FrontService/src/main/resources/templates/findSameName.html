@@ -2,80 +2,330 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Находим совпадение</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Находим совпадение</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
 </head>
 
 <body>
-    <div class="p-3 m-0 border-0 bd-example m-0 border-0">
-        <ul class="nav justify-content-center">
-            <li class="nav-item">
-                <a class="nav-link" href="/">HOME</a>
-            </li>
-        </ul>
-    </div>
+  <div class="p-3 m-0 border-0 bd-example m-0 border-0">
+    <ul class="nav justify-content-center">
+      <li class="nav-item">
+        <a class="nav-link" href="/">HOME</a>
+      </li>
+    </ul>
+  </div>
 
-    <div class="top">
-        <div id="findSameName" class="catalog-product">
-            <p>Выберите два файла для загрузки и обработки:</p>
-            <form id="fileUploadForm">
-                <input type="file" name="file1" accept=".csv">
-                <input type="file" name="file2" accept=".xlsx, .xls">
-                <input type="button" id="uploadButton" onclick="uploadFiles()" value="Загрузить и обработать">
-                <div id="forbiddenAccess" style="display: none; color: red;">
-                    Запрет от сервера. Надо авторизоватся.
-                </div>
-            </form>
+  <div class="top">
+    <div class="container px-4 text-center">
+      <div class="card mt-5">
+        <label for="formFile" class="form-label">ФАЙЛ ИСХОДНИК С РАСШИРЕНИЕМ .csv</label>
+        <p>должно быть: | Название | Артикул | Цена | Количество |</p>
+        <input class="form-control" type="file" id="formFile1" name="file1" accept=".csv" />
+        <div id="file1Error" class="invalid-feedback" style="display: none">
+          Пожалуйста, выберите файл
         </div>
+        <div id="correctFileCSV" style="display: none; color: green">
+          Файл соответствует
+        </div>
+        <div id="errorFileCSV" style="display: none; color: red">
+          Файл не соответствует, должно быть: | Название | Артикул | Цена | Количество |
+        </div>
+      </div>
+
+      <div class="card mt-5">
+        <label for="formFile" class="form-label">ПРАЙС ПОСТАВЩИКА С РАСШИРЕНИЕМ .xlsx, .xls</label>
+        <p>должно быть: |...| Товары (работы, услуги) |...| Товар |...| Сумма |</p>
+        <input class="form-control" type="file" id="formFile2" name="file2" accept=".xlsx, .xls" />
+        <div id="file2Error" class="invalid-feedback" style="display: none">
+          Пожалуйста, выберите файл
+        </div>
+
+        <div id="correctFileXLS" style="display: none; color: green">
+          Файл соответствует
+        </div>
+        <div id="errorFileXLS" style="display: none; color: red">
+          Файл не соответствует, должно быть: |...| Товары (работы, услуги) |...| Товар |...| Сумма |
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-outline-primary mt-5" id="uploadButton" style="display: none"
+        onclick="validateAndUpload()">
+        <span id="buttonContent">Загрузить и обработать</span>
+        <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </button>
+      <div id="forbiddenAccess" style="display: none; color: red">
+        Запрет от сервера. Надо авторизоваться.
+      </div>
+      <div id="LoginAccess" style="display: none; color: red">
+        Чтобы воспользоваться сервисом, надо авторизоваться.
+      </div>
+      <div id="ServerFail" style="display: none; color: red">
+        Нет ответа от сервера.
+      </div>
     </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Проверяем, есть ли данные в локальном хранилище
-            var username = localStorage.getItem('username');
-            // Если есть данные, заменяем содержимое элемента на имя пользователя
-            if (username) {
-                document.getElementById('fileUploadForm').style.display = 'block';
-            }
-            else {
-                document.getElementById('fileUploadForm').style.display = 'none';
-                alert('Вы не авторизованы');
-            }
-        });
-        function uploadFiles() {
-            const file1 = document.querySelector('input[name="file1"]').files[0];
-            const file2 = document.querySelector('input[name="file2"]').files[0];
-
-            const formData = new FormData();
-            formData.append('file1', file1);
-            formData.append('file2', file2);
-            // Получение accessToken из localStorage
-            const accessToken = localStorage.getItem('accessToken');
-            fetch('http://localhost:8082/resourceservice/findSameName', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + accessToken
-                },
-                body: formData
-            })
-                .then(response => {
-                    if (response.status === 403) {
-                        document.getElementById("forbiddenAccess").style.display = "block";
-                        throw new Error('Forbidden access');
-                    }
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    window.open(url, '_blank');
-                });
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (isAccessTokenExpired()) {
+        if (!updateAccessToken()) {
+          document.getElementById("LoginAccess").style.display = "block";
+        } else {
+          document.getElementById("uploadButton").style.display = "block";
         }
+      } else {
+        document.getElementById("uploadButton").style.display = "block";
+      }
 
-    </script>
+    });
+    document.getElementById("formFile1").addEventListener("change", function () {
+      const file = this.files[0];
+      validateCSVFile(file)
+        .then((result) => {
+          if (result) {
+            document.getElementById("correctFileCSV").style.display = "block";
+          } else {
+            document.getElementById("errorFileCSV").style.display = "block";
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+    document.getElementById("formFile2").addEventListener("change", function () {
+      const file = this.files[0];
+      validateExcelFile(file)
+        .then((result) => {
+          if (result) {
+            document.getElementById("correctFileXLS").style.display = "block";
+          } else {
+            document.getElementById("errorFileXLS").style.display = "block";
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+
+    function isAccessTokenExpired() {
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken === null || accessToken === "null" || accessToken === undefined) {
+        // Токен не существует, считаем, что он истек
+        //console.log("Токен не существует");
+        return true;
+      }
+      try {
+        // Парсим токен, чтобы получить информацию о сроке действия
+        const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+        const expiryTime = tokenPayload.exp * 1000; // Переводим из секунд в миллисекунды
+        // Сравниваем с текущим временем
+        return Date.now() >= expiryTime;
+      } catch (error) {
+        //console.error('Ошибка при разборе токена:', error);
+        return true; // В случае ошибки считаем, что токен истек
+      }
+    }
+    function updateAccessToken() {
+      // Получение refreshToken из localStorage
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
+        return false;
+      }
+      // Отправка запроса на обновление токена
+      fetch('https://закупайумно.рф/auth/api/token', {
+        //fetch('http://localhost:8765/auth/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refreshToken })
+      })
+        .then(response => response.json())
+        .then(data => {
+          // если от сервера приходит null
+          if (data.accessToken != null) {
+            // Сохранение нового accessToken
+            localStorage.setItem('accessToken', data.accessToken);
+            //console.log("обновлен access token")
+            return true;
+          } else {
+            //console.log("access token = null")
+            return false;
+          }
+        })
+        .catch(error => {
+          //console.log("не обновлен accessToken")
+          document.getElementById("failServer").style.display = "block";
+        });
+    }
+
+    function validateCSVFile(file) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          header: false,
+          skipEmptyLines: true,
+          encoding: "windows-1251",
+          delimiter: ";",
+          step: function (result) {
+            const targetString = "Название;Артикул;Цена;Количество";
+            const line = result.data.join(";").trim();
+            if (line === targetString) {
+              resolve(true);
+              return false; // stop parsing
+            }
+          },
+          complete: function () {
+            resolve(false); // resolve with false if the target string is not found
+          },
+          error: function (err, file, inputElem, reason) {
+            console.error(`Error while parsing the file: ${err}`); // log the error
+            reject("Error while parsing the file");
+          },
+        });
+      });
+    }
+
+    function validateExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const dataArray = XLSX.utils.sheet_to_json(worksheet, {
+            header: 1,
+          });
+          const requiredName1 = "Товары (работы, услуги)";
+          const requiredName2 = "Товар";
+          const requiredSum = "Сумма";
+          let nameTrue = false;
+          for (const row of dataArray) {
+            for (const str of row) {
+              if (str === requiredName1 || str === requiredName2) {
+                //console.log(row)
+                nameTrue = true;
+              }
+              if (str === requiredSum && nameTrue) {
+                resolve(true);
+                return; // stop processing
+              }
+            }
+          }
+          resolve(false); // false if the target string is not found
+        };
+        reader.onerror = (error) => {
+          reject("Error while reading the file");
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function validateAndUpload() {
+      // Получаем ссылки на поля ввода
+      var file1Input = document.getElementById("formFile1");
+      var file2Input = document.getElementById("formFile2");
+      // Проверяем, были ли выбраны файлы
+      if (!file1Input.files[0]) {
+        // Если файл не выбран, добавляем классы Bootstrap для подсветки
+        file1Input.classList.add("is-invalid");
+        // Показываем сообщение об ошибке
+        document.getElementById("file1Error").style.display = "block";
+        return; // Прекращаем выполнение функции
+      } else {
+        // Если файл выбран, удаляем классы Bootstrap и скрываем сообщение об ошибке
+        file1Input.classList.remove("is-invalid");
+        document.getElementById("file1Error").style.display = "none";
+      }
+      if (!file2Input.files[0]) {
+        file2Input.classList.add("is-invalid");
+        document.getElementById("file2Error").style.display = "block";
+        return;
+      } else {
+        file2Input.classList.remove("is-invalid");
+        document.getElementById("file2Error").style.display = "none";
+      }
+      // Если оба файла выбраны, продолжаем выполнение кода, например, отправляем запрос на сервер
+      uploadFiles();
+    }
+
+    function uploadFiles() {
+      var buttonContent = document.getElementById("buttonContent");
+      var loadingSpinner = document.getElementById("loadingSpinner");
+      const file1 = document.querySelector('input[name="file1"]').files[0];
+      const file2 = document.querySelector('input[name="file2"]').files[0];
+      const formData = new FormData();
+      formData.append("file1", file1);
+      formData.append("file2", file2);
+      const accessToken = localStorage.getItem("accessToken");
+      buttonContent.style.display = "none";
+      loadingSpinner.style.display = "inline-block";
+      let filename; // Declare filename variable outside the first then() block
+      //fetch("https://закупайумно.рф/resource/service/findSameName", {
+      fetch('http://localhost:8765/resource/service/findSameName', {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+        body: formData,
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            uploadButton.innerText = "Выполнено";
+            for (const [key, value] of response.headers.entries()) {
+              //console.log("key " + key + ': ' + value);
+              if (key === 'content-disposition') {
+                // content-disposition:inline; filename="resultFileName"
+                const filenameMatch = value.match(/filename="(.+)"/);
+                filename = filenameMatch[1];
+              }
+            }
+          } else if (response.status === 403) {
+            console.error("Error 403");
+            document.getElementById("forbiddenAccess").style.display =
+              "block";
+            changeButton();
+            throw new Error("Forbidden access");
+          } else {
+            changeButton();
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          const fileUrl = URL.createObjectURL(blob);
+          const downloadLink = document.createElement('a');
+          downloadLink.href = fileUrl;
+          downloadLink.download = filename;
+          downloadLink.click();
+          // Revoke the object URL to free up memory
+          URL.revokeObjectURL(fileUrl);
+
+        })
+        .catch((error) => {
+          console.error("Error: ", error);
+          document.getElementById("ServerFail").style.display = "block";
+          changeButton();
+        });
+    }
+
+    function changeButton() {
+      var buttonContent = document.getElementById("buttonContent");
+      var loadingSpinner = document.getElementById("loadingSpinner");
+      buttonContent.style.display = "inline-block";
+      loadingSpinner.style.display = "none";
+    }
+
+  </script>
+  <!-- Read CSV files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <!-- Include SheetJS library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 
 </html>
