@@ -6,7 +6,7 @@ import java.util.List;
 public class DuplicateGoods {
 
 
-    public List<StructureCSV> duplicateGoods(List<StructureCSV> duplicateNames) {
+    public List<StructureCSV> findDuplicateGoods(List<StructureCSV> duplicateNames) {
 
         List<StructureCSV> Names = new ArrayList<>();
         for (StructureCSV row : duplicateNames) {
