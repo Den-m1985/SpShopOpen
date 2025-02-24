@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: microservice-resourceservice
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE}
+      max-request-size: ${MAX_REQUEST_SIZE}
+  config:
+    import: optional:.env
+
+server:
+  port: ${SERVER_PORT}
+  servlet:
+    context-path: ${CONTEXT_PATH}
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+
+jwt:
+  secret: ${JWT_KEY_SECRET}

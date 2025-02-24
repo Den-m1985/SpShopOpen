@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: microservice-authservice
+
+  datasource:
+    url: ${DATA_BASE_PATH}
+    username: ${DATA_BASE_USER}
+    password: ${DATA_BASE_PASSWORD}
+    driverClassName: org.postgresql.Driver
+    platform: postgres
+    initialization-mode: always
+    continue-on-error: true
+  jpa:
+      show-sql: false
+      generate-ddl: true
+      hibernate:
+        ddl-auto: update
+      database: postgresql
+
+server:
+  port: ${SERVER_PORT}
+  servlet:
+    context-path: ${CONTEXT_PATH}
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+
+jwt:
+  secret:
+    access: ${JWT_KEY_ACCESS}
+    refresh: ${JWT_KEY_REFRESH}
+  lifetime: ${lifetime}
+

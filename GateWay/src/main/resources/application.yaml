@@ -1,6 +1,7 @@
 server:
-  port: 8765
-
+  port: ${SERVER_PORT}
+  error:
+    include-stacktrace: never
 
 spring:
   application:
@@ -8,11 +9,39 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: AuthService
-          uri: http://localhost:8000/
+        - id: ${ROUTES_AUTH_SERVICE_ID}
+          uri: ${ROUTES_AUTH_SERVICE_URI}
           predicates:
-            - Path=/**
-        - id: ResourceService
-          uri: http://localhost:8082/
+            - ${ROUTES_AUTH_SERVICE_PREDICATE}
+          filters:
+            - StripPrefix=1
+            - PrefixPath=/ru-spshop-auth
+        #----------------------------
+        - id: ${ROUTES_RESOUSCE_SERVICE_ID}
+          uri: ${ROUTES_RESOUSCE_SERVICE_URI}
           predicates:
-            - Path=/**
+            - ${ROUTES_RESOUSCE_SERVICE_PREDICATE}
+          filters:
+            - StripPrefix=1
+            - PrefixPath=/ru-spshop-resource
+            - JwtFilter
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+
+jwt:
+  secret: ${JWT_KEY_SECRET}
+
+management:
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: gateway

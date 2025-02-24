@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main</title>
+    <title>закупай умно</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
@@ -19,8 +19,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="/about">О ПРОЕКТЕ</a>
             </li>
+            <!--<li class="nav-item">
+                <a class="nav-link" href="/admin">АДМИНКА</a>
+            </li>-->
             <li class="nav-item">
-                <a class="nav-link" href="/account"><span id="usernamePlaceholder">ACCOUNT</span></a>
+                <a class="nav-link" href="/account"><span id="usernamePlaceholder">ВОЙТИ В АККАУНТ</span></a>
             </li>
         </ul>
     </div>
@@ -29,20 +32,24 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+                    <img src="/excel.png" class="card-img-top" alt="...">
                     <div class="card-body">
                         <a href="/findSameName" class="btn btn-primary">Находим совпадение в счете</a>
                     </div>
                 </div>
             </div>
+
+
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+                    <img src="/excel.png" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <a href="#" class="btn btn-primary">Работаем с сайтом ААА</a>
+                        <a href="/uraltoys" class="btn btn-primary">ural toys</a>
                     </div>
                 </div>
             </div>
+
+            <!--
             <div class="col-md-4">
                 <div class="card mb-4">
                     <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
@@ -51,22 +58,23 @@
                     </div>
                 </div>
             </div>
+            -->
         </div>
     </div>
-
+    <!--
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">Информация о магазине.</span>
+            <span class="text-muted">Информация о сервисе.</span>
         </div>
     </footer>
-
+    -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (isAccessTokenExpired()) {
                 console.log('access token истек');
+                updateAccessToken();
             } else {
                 console.log('access token действителен');
-                // Проверяем, есть ли данные в локальном хранилище
                 var username = localStorage.getItem('username');
                 // Если есть данные, заменяем содержимое элемента на имя пользователя
                 if (username) {
@@ -79,21 +87,54 @@
             //console.log("accessToken " + accessToken);
             if (accessToken === null || accessToken === "null" || accessToken === undefined) {
                 // Токен не существует, считаем, что он истек
-                console.log("Токен не существует");
+                //console.log("Токен не существует");
                 return true;
             }
             try {
                 // Парсим токен, чтобы получить информацию о сроке действия
                 const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
                 const expiryTime = tokenPayload.exp * 1000; // Переводим из секунд в миллисекунды
-                console.log("expiryTime " + expiryTime)
-                console.log("Date.now() " + Date.now())
+                //console.log("expiryTime " + expiryTime)
+                //console.log("Date.now() " + Date.now())
                 // Сравниваем с текущим временем
                 return Date.now() >= expiryTime;
             } catch (error) {
                 console.error('Ошибка при разборе токена:', error);
                 return true; // В случае ошибки считаем, что токен истек
             }
+        }
+
+        function updateAccessToken() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
+                //console.log("отсутствует refresh token")
+                return false;
+            }
+            // Отправка запроса на обновление токена
+            fetch('https://закупайумно.рф/auth/api/token', {
+                //fetch('http://localhost:8765/auth/api/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ refreshToken })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // если от сервера приходит null
+                    if (data.accessToken != null) {
+                        // Сохранение нового accessToken
+                        localStorage.setItem('accessToken', data.accessToken);
+                        //console.log("обновлен access token")
+                        return true;
+                    } else {
+                        //console.log("access token = null")
+                        return false;
+                    }
+                })
+                .catch(error => {
+                    //console.log("не обновлен accessToken")
+                });
         }
     </script>
 </body>

@@ -17,6 +17,11 @@ public class ShopController {
         return "findSameName";
     }
 
+    @GetMapping("/uraltoys")
+    public String getUraltoysPage() {
+        return "uralToys";
+    }
+
     @GetMapping("/contact")
     public String getContactPage() {
         return "contact";
@@ -25,6 +30,11 @@ public class ShopController {
     @GetMapping("/about")
     public String getAboutPage() {
         return "about";
+    }
+
+    @GetMapping("/admin")
+    public String getAdminPage() {
+        return "admin";
     }
 
 }

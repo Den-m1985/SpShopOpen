@@ -20,16 +20,23 @@
         </ul>
     </div>
 
-    <h1 th:inline="text">Привет <span id="usernamePlaceholder">незнакомец</span></h1>
-    <div id="failServer" style="display: none; color: red;">
-        <h1>сервер не отвечает</h1>
+    <div class="container mt-4">
+        <h4 th:inline="text">Привет <span id="usernamePlaceholder"></span></h4>
+        <div id="failServer" style="display: none; color: red;">
+            <h2>сервер не отвечает</h2>
+        </div>
+        <div class="mt-1">
+            <button type="button" id="loginButton" class="btn btn-light mt-4"><a href="/account/login">ВОЙТИ В
+                    АККАУНТ</a></button>
+        </div>
+        <div class="mt-1">
+            <button type="button" id="registerButton" class="btn btn-light mt-4"><a
+                    href="/account/register">ЗАРЕГИСТРИРОВАТСЯ</a></button>
+        </div>
+        <form onsubmit="logout()">
+            <div><input type="submit" id="logOutButton" value="ВЫЙТИ"></div>
+        </form>
     </div>
-    <button type="button" id="loginButton" class="btn btn-light"><a href="/account/login">LOGIN</a></button>
-    <button type="button" id="registerButton" class="btn btn-light"><a href="/account/register">REGISTER</a></button>
-
-    <form onsubmit="logout()">
-        <div><input type="submit" id="logOutButton" value="ВЫЙТИ"></div>
-    </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -66,12 +73,12 @@
             // Получение refreshToken из localStorage
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
-                //window.location.href = "/account/login";
-                console.log("отсутствует refresh token")
+                //console.log("отсутствует refresh token")
                 return false;
             }
             // Отправка запроса на обновление токена
-            fetch('http://localhost:8000/api/auth/token', {
+            fetch('https://закупайумно.рф/auth/api/token', {
+                //fetch('http://localhost:8765/auth/api/token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -80,18 +87,16 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    //console.log("data " + data.accessToken);
                     // если от сервера приходит null
                     if (data.accessToken != null) {
                         // Сохранение нового accessToken
                         localStorage.setItem('accessToken', data.accessToken);
-                        console.log("обновлен access token")
-                    }else{
-                        console.log("access token = null")
+                        return true;
+                    } else {
+                        return false;
                     }
                 })
                 .catch(error => {
-                    console.log("не обновлен accessToken")
                     document.getElementById("failServer").style.display = "block";
                 });
         }
@@ -100,15 +105,15 @@
             const accessToken = localStorage.getItem('accessToken');
             if (accessToken === null || accessToken === "null" || accessToken === undefined) {
                 // Токен не существует, считаем, что он истек
-                console.log("Токен не существует");
+                //console.log("Токен не существует");
                 return true;
             }
             try {
                 // Парсим токен, чтобы получить информацию о сроке действия
                 const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
                 const expiryTime = tokenPayload.exp * 1000; // Переводим из секунд в миллисекунды
-                console.log("expiryTime " + expiryTime)
-                console.log("Date.now() " + Date.now())
+                //console.log("expiryTime " + expiryTime)
+                //console.log("Date.now() " + Date.now())
                 // Сравниваем с текущим временем
                 return Date.now() >= expiryTime;
             } catch (error) {
