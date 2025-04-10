@@ -1,58 +1,91 @@
 package ru.spshop.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.micrometer.common.lang.NonNull;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.spshop.model.enums.Gender;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "user_name"),
         @UniqueConstraint(columnNames = "email")
 })
-public class User {
+public class User extends BaseEntity /*implements UserDetails*/ {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(unique = true)
-    private String userId;
+//    @Column(name = "user_name", unique = true)
+//    @NonNull
+//    private String username;
 
-    @Column(name = "user_name", unique = true)
-    @NonNull
-    private String username;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @NonNull
-    @Column(name = "email", unique = true)
+    @Column(name = "middle_name")
+    private String middleName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @NonNull
-    @JsonIgnore
+    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, name = "roles")
     @Enumerated(EnumType.STRING)
-    private Collection<Role> roles;
+    private Gender gender;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(userId, user.userId);
-    }
+    @ManyToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_role"))
+    private Role role;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId);
-    }
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Contact> contacts;
 
-    public User() {
-    }
 
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
+//        return List.of(authority);
+//    }
+//
+//    @Override
+//    public String getUsername() {
+//        return email;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonExpired() {
+//        return UserDetails.super.isAccountNonExpired();
+//    }
+//
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return UserDetails.super.isAccountNonLocked();
+//    }
+//
+//    @Override
+//    public boolean isCredentialsNonExpired() {
+//        return UserDetails.super.isCredentialsNonExpired();
+//    }
+//
+//    @Override
+//    public boolean isEnabled() {
+//        return UserDetails.super.isEnabled();
+//    }
 }

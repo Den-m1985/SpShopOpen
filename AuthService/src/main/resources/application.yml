@@ -34,5 +34,8 @@ jwt:
   secret:
     access: ${JWT_KEY_ACCESS}
     refresh: ${JWT_KEY_REFRESH}
-  lifetime: ${lifetime}
+  lifetime: ${LIFETIME}
 
+supper_admin:
+  email: ${SUPPER_ADMIN_EMAIL}
+  password: ${SUPPER_ADMIN_PASSWORD}

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: auth
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATA_BASE_USER}
+      POSTGRES_PASSWORD: ${DATA_BASE_PASSWORD}
+      POSTGRES_DB: ${DATA_BASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

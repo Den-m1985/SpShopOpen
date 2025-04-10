@@ -7,16 +7,6 @@ import ru.spshop.model.User;
 import java.util.Optional;
 
 @Repository
-public interface UsersRepository extends JpaRepository<User, String> {
-    /**
-     * Selects a user by his name.
-     * @return
-     */
-    Optional<User> findByUsername(String username);
-
-    /**
-     * Selects a user by his name.
-     * @return
-     */
+public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 }

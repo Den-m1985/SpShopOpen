@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: microservice-authservice
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+  servlet:
+    context-path: /ru-spshop-auth
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+
+jwt:
+  secret:
+    access: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCDM1CGdbcKpFyfXKxJgqhzQoruKfYrGMUfWIxm/cC64mA==
+    refresh: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCDM1CGdbcKpFyfXKxJgqhzQoruKfYrGMUfWIxm/cC64mA==
+  lifetime: 360000
+
+supper_admin:
+  email: super@admin.com
+  password: password

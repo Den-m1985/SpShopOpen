@@ -1,20 +1,23 @@
 package ru.spshop.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
-public class AuthUser extends User implements UserDetails {
-
+@Getter
+@AllArgsConstructor
+public class AuthUser implements UserDetails {
     private final User user;
 
-    public AuthUser(User user) {
-        this.user = user;
-    }
-
-    public User getUser() {
-        return user;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().getName().toString());
+        return List.of(authority);
     }
 
     @Override
@@ -23,34 +26,27 @@ public class AuthUser extends User implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-        return user.getUsername();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return UserDetails.super.isAccountNonExpired();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return UserDetails.super.isAccountNonLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return UserDetails.super.isCredentialsNonExpired();
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return UserDetails.super.isEnabled();
     }
 
+    @Override
+    public String getUsername() {
+        return user.getEmail();
+    }
 }
