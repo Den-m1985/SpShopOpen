@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.spshop.filter.JwtAuthenticationFilter;
+import ru.spshop.model.enums.RoleEnum;
 
 
 @Configuration
@@ -33,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/users/**").permitAll()
                         .requestMatchers("/tests/**").authenticated()
+                        .requestMatchers("/admin/**").authenticated()
                         .requestMatchers(WHITE_LIST_SWAGGER).permitAll()
                         .anyRequest().authenticated()
                 )

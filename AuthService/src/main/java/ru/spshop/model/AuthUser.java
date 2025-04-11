@@ -32,7 +32,8 @@ public class AuthUser implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+//        return UserDetails.super.isAccountNonLocked();
+        return !user.isLocked(); // if true — user non blocked
     }
 
     @Override

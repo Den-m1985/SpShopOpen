@@ -28,10 +28,6 @@ import java.util.List;
 })
 public class User extends BaseEntity /*implements UserDetails*/ {
 
-//    @Column(name = "user_name", unique = true)
-//    @NonNull
-//    private String username;
-
     @Column(name = "first_name")
     private String firstName;
 
@@ -46,6 +42,8 @@ public class User extends BaseEntity /*implements UserDetails*/ {
 
     @Column(nullable = false)
     private String password;
+
+    private boolean locked = false;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;

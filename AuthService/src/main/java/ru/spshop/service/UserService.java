@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.spshop.bootstrap.RoleSeeder;
 import ru.spshop.dto.ChangeUserRoleDto;
+import ru.spshop.dto.UserBlockDto;
 import ru.spshop.model.Role;
 import ru.spshop.model.User;
 import ru.spshop.model.enums.RoleEnum;
@@ -49,6 +50,18 @@ public class UserService {
         var user = getUserByEmail(request.email());
         user.setRole(role);
         return userRepository.save(user);
+    }
+
+    public void blockUser(UserBlockDto userEmail) {
+        User user = getUserByEmail(userEmail.email());
+        user.setLocked(true);
+        userRepository.save(user);
+    }
+
+    public void unblockUser(UserBlockDto userEmail) {
+        User user = getUserByEmail(userEmail.email());
+        user.setLocked(false);
+        userRepository.save(user);
     }
 
 }
