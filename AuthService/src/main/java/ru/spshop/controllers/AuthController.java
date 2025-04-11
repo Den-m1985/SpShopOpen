@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.spshop.dto.AuthResponse;
 import ru.spshop.dto.JwtAuthResponse;
 import ru.spshop.dto.RefreshJwtRequest;
+import ru.spshop.dto.UserBlockDto;
 import ru.spshop.dto.UserDTO;
 import ru.spshop.service.AuthService;
 import ru.spshop.service.RegisterService;
@@ -30,6 +31,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> login(@RequestBody @Valid UserDTO authRequest) {
         return ResponseEntity.ok(authService.login(authRequest));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody UserBlockDto request) {
+        // TODO
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/token")

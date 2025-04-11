@@ -42,10 +42,11 @@ public class JwtProvider {
         final Date accessExpiration = Date.from(accessExpirationInstant);
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(accessExpiration)
-                .signWith(jwtAccessSecret)
                 .claim("roles", userDetails.getAuthorities())
                 .claim("firstName", userDetails.getUsername())
+                .signWith(jwtAccessSecret)
                 .compact();
     }
 
