@@ -13,7 +13,6 @@ import java.util.Date;
  */
 @Component
 public class JwtUtil {
-    //final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     @Value("${jwt.secret}")
     private String secret;
@@ -25,25 +24,17 @@ public class JwtUtil {
                 .getBody();
     }
 
-    /**
-     * Whether the token is valid.
-     *
-     * @return
-     */
+
     public boolean isInvalid(String token) {
         Claims claims;
         try {
             claims = getAllClaimsFromToken(token);
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
             return true;
         }
         Date dateToken = claims.getExpiration();
         Date dateNow = new Date();
-        boolean result = dateToken.before(dateNow);
-        long resultDate = dateNow.getTime()-dateToken.getTime();
-        //log.info("JwtUtil/isInvalid/ Date now - DateToken in sec: " + resultDate/1000);
-        //log.info("JwtUtil/isInvalid/ result: " + result);
-        return result;
+        return dateToken.before(dateNow);
     }
 
 }
