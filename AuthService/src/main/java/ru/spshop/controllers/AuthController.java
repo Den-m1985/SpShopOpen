@@ -1,9 +1,12 @@
 package ru.spshop.controllers;
 
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.spshop.dto.AuthResponse;
 import ru.spshop.dto.JwtAuthResponse;
 import ru.spshop.dto.RefreshJwtRequest;
-import ru.spshop.dto.UserBlockDto;
 import ru.spshop.dto.UserDTO;
 import ru.spshop.service.AuthService;
 import ru.spshop.service.RegisterService;
@@ -29,20 +31,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody @Valid UserDTO authRequest) {
-        return ResponseEntity.ok(authService.login(authRequest));
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody @Valid UserDTO authRequest, HttpServletResponse response) {
+        return ResponseEntity.ok(authService.login(authRequest, response));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody UserBlockDto request) {
-        // TODO
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        authService.logout(response);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/token")
-    public ResponseEntity<JwtAuthResponse> getNewAccessToken(@RequestBody RefreshJwtRequest request) {
-        final JwtAuthResponse token = authService.getAccessToken(request.refreshToken());
-        return ResponseEntity.ok(token);
+    public ResponseEntity<JwtAuthResponse> getNewAccessToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        JwtAuthResponse response = authService.getAccessToken(refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh")

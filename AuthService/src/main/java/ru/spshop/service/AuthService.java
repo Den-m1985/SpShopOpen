@@ -2,8 +2,12 @@ package ru.spshop.service;
 
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +16,9 @@ import ru.spshop.dto.JwtAuthResponse;
 import ru.spshop.dto.UserDTO;
 import ru.spshop.model.AuthUser;
 import ru.spshop.model.User;
+import ru.spshop.service.jwt.JwtProvider;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +30,10 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
 
-    public JwtAuthResponse login(UserDTO request) {
+    @Value("${jwt.lifetime.refresh}")
+    private Integer lifetimeRefreshToken;
+
+    public JwtAuthResponse login(UserDTO request, HttpServletResponse response) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.email(),
                 request.password()));
@@ -34,7 +43,26 @@ public class AuthService {
         final String accessToken = jwtProvider.generateAccessToken(userDetail);
         final String refreshToken = jwtProvider.generateRefreshToken(userDetail);
         refreshStorage.put(user.getEmail(), refreshToken);
-        return new JwtAuthResponse(accessToken, refreshToken);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+//                .secure(true) // only HTTPS
+                .path("/v1/users")
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(lifetimeRefreshToken))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return new JwtAuthResponse(accessToken, null);
+    }
+
+    public void logout(HttpServletResponse response){
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/v1/users")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
 
@@ -47,6 +75,7 @@ public class AuthService {
                 User user = userService.getUserByEmail(login);
                 UserDetails userDetail = new AuthUser(user);
                 final String accessToken = jwtProvider.generateAccessToken(userDetail);
+//                final String newRefreshToken = jwtProvider.generateRefreshToken(userDetail);
                 return new JwtAuthResponse(accessToken, null);
             }
         }

@@ -75,8 +75,7 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty());
+                .andExpect(jsonPath("$.accessToken").isNotEmpty());
     }
 
     @Test

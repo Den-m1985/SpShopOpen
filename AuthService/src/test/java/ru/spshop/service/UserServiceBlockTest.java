@@ -51,7 +51,7 @@ public class UserServiceBlockTest {
         UserBlockDto userBlockDto = new UserBlockDto(email);
         userService.blockUser(userBlockDto);
         User blockedUser = userService.getUserByEmail(email);
-        assertTrue(blockedUser.isLocked(), "User should be locked");
+        assertTrue(blockedUser.getLocked(), "User should be locked");
     }
 
     @Test
@@ -60,12 +60,12 @@ public class UserServiceBlockTest {
         // сначала блокируем
         userService.blockUser(userBlockDto);
         User blockedUser = userService.getUserByEmail(email);
-        assertTrue(blockedUser.isLocked());
+        assertTrue(blockedUser.getLocked());
 
         // затем разблокируем
         userService.unblockUser(userBlockDto);
         User unblockedUser = userService.getUserByEmail(email);
-        assertFalse(unblockedUser.isLocked(), "User should be unlocked");
+        assertFalse(unblockedUser.getLocked(), "User should be unlocked");
     }
 
     @Test

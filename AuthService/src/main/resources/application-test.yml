@@ -29,7 +29,9 @@ jwt:
   secret:
     access: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCDM1CGdbcKpFyfXKxJgqhzQoruKfYrGMUfWIxm/cC64mA==
     refresh: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCDM1CGdbcKpFyfXKxJgqhzQoruKfYrGMUfWIxm/cC64mA==
-  lifetime: 360000
+  lifetime:
+    access: 30000
+    refresh: 5
 
 supper_admin:
   email: super@admin.com

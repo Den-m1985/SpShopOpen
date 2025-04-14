@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import ru.spshop.service.jwt.JwtService;
+import ru.spshop.service.jwt.JwtProvider;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
-    private final JwtService jwtService;
+    private final JwtProvider jwtProvider;
     private final UserDetailsService userDetailsService;
 
 
@@ -40,11 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         try {
             final String jwt = authHeader.substring(7);
-            final String userEmail = jwtService.extractUsername(jwt);
+            final String userEmail = jwtProvider.extractUsername(jwt);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+                if (jwtProvider.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,

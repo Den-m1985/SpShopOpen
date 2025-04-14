@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,11 +21,8 @@ import java.util.List;
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "user_name"),
-        @UniqueConstraint(columnNames = "email")
-})
-public class User extends BaseEntity /*implements UserDetails*/ {
+@Table(name = "users")
+public class User extends BaseEntity {
 
     @Column(name = "first_name")
     private String firstName;
@@ -43,7 +39,7 @@ public class User extends BaseEntity /*implements UserDetails*/ {
     @Column(nullable = false)
     private String password;
 
-    private boolean locked = false;
+    private Boolean locked = false;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -55,35 +51,4 @@ public class User extends BaseEntity /*implements UserDetails*/ {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private List<Contact> contacts;
 
-
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
-//        return List.of(authority);
-//    }
-//
-//    @Override
-//    public String getUsername() {
-//        return email;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return UserDetails.super.isAccountNonExpired();
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return UserDetails.super.isAccountNonLocked();
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return UserDetails.super.isCredentialsNonExpired();
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return UserDetails.super.isEnabled();
-//    }
 }

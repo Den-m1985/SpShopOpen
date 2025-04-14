@@ -59,7 +59,7 @@ public class AdminControllerTest {
                 .andExpect(status().isOk());
 
         User user = userRepository.findByEmail(email).orElseThrow();
-        assertTrue(user.isLocked(), "User should be locked");
+        assertTrue(user.getLocked(), "User should be locked");
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AdminControllerTest {
                 .andExpect(status().isOk());
 
         User user = userRepository.findByEmail(email).orElseThrow();
-        assertFalse(user.isLocked(), "User should be unlocked");
+        assertFalse(user.getLocked(), "User should be unlocked");
     }
 
     @Test

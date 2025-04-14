@@ -14,8 +14,8 @@ package ru.spshop.filter;
 //import org.springframework.util.StringUtils;
 //import org.springframework.web.filter.GenericFilterBean;
 //import ru.spshop.model.JwtAuthentication;
-//import ru.spshop.service.JwtProvider;
-//import ru.spshop.service.JwtUtils;
+//import ru.spshop.service.jwt.JwtProvider;
+//import ru.spshop.service.jwt.JwtUtils;
 //
 //import java.io.IOException;
 

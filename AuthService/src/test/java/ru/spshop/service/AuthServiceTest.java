@@ -1,5 +1,6 @@
 package ru.spshop.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,9 @@ import ru.spshop.dto.UserDTO;
 import ru.spshop.repositories.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -21,6 +24,8 @@ public class AuthServiceTest {
     private UserRepository userRepository;
     @Autowired
     private RegisterService registerService;
+
+    private final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 
     private final String email = "john.doe@example.com";
     private final String password = "password";
@@ -35,21 +40,21 @@ public class AuthServiceTest {
     @Test
     public void shouldAuthenticateAndReturnTokens() {
         UserDTO loginDto = new UserDTO(email, password);
-        JwtAuthResponse response = authService.login(loginDto);
+        JwtAuthResponse response = authService.login(loginDto, servletResponse);
         assertNotNull(response);
         assertNotNull(response.getAccessToken());
-        assertNotNull(response.getRefreshToken());
+        assertNull(response.getRefreshToken());
     }
 
     @Test
     public void shouldThrowExceptionWithWrongPassword() {
         UserDTO loginDto = new UserDTO(email, "wrongPassword");
-        assertThrows(RuntimeException.class, () -> authService.login(loginDto));
+        assertThrows(RuntimeException.class, () -> authService.login(loginDto, servletResponse));
     }
 
     @Test
     public void shouldThrowExceptionWhenUserDoesNotExist() {
         UserDTO loginDto = new UserDTO("nonexistent@example.com", "any");
-        assertThrows(RuntimeException.class, () -> authService.login(loginDto));
+        assertThrows(RuntimeException.class, () -> authService.login(loginDto, servletResponse));
     }
 }
