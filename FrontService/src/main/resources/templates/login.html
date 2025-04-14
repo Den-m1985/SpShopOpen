@@ -58,7 +58,7 @@
     <script>
         function loginUser() {
             var loginData = {
-                username: document.getElementsByName("username")[0].value,
+                email: document.getElementsByName("username")[0].value,
                 password: document.getElementsByName("password")[0].value,
             };
             var buttonContent = document.getElementById('buttonContent');
@@ -66,8 +66,8 @@
             buttonContent.style.display = 'none';
             loadingSpinner.style.display = 'inline-block';
 
-            fetch('https://закупайумно.рф/auth/api/login', {
-                //fetch('http://localhost:8765/auth/api/login', {
+            //fetch('https://закупайумно.рф/auth/api/login', {
+            fetch('http://localhost:8765/auth/v1/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -85,7 +85,7 @@
                     }
                 })
                 .then(data => {
-                    //console.log("data " + data)
+                    console.log("data " + data)
                     if (!data) {
                         return false;
                     }
