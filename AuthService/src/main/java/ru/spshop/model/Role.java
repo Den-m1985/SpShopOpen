@@ -1,19 +1,22 @@
 package ru.spshop.model;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import ru.spshop.model.enums.RoleEnum;
 
-@RequiredArgsConstructor
-public enum Role implements GrantedAuthority {
+@Getter
+@Setter
+@Table(name = "roles")
+@Entity
+public class Role extends BaseEntity {
 
-    ADMIN("ADMIN"),
-    USER("USER");
-
-    private final String vale;
-
-    @Override
-    public String getAuthority() {
-        return vale;
-    }
+    @Column(unique = true, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleEnum name;
 
 }

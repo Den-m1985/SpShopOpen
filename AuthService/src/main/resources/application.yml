@@ -11,11 +11,11 @@ spring:
     initialization-mode: always
     continue-on-error: true
   jpa:
-      show-sql: false
-      generate-ddl: true
-      hibernate:
-        ddl-auto: update
-      database: postgresql
+    show-sql: false
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    database: postgresql
 
 server:
   port: ${SERVER_PORT}
@@ -34,5 +34,10 @@ jwt:
   secret:
     access: ${JWT_KEY_ACCESS}
     refresh: ${JWT_KEY_REFRESH}
-  lifetime: ${lifetime}
+  lifetime:
+    access: ${LIFETIME_ACCESS_TOKEN}
+    refresh: ${LIFETIME_REFRESH_TOKEN}
 
+supper_admin:
+  email: ${SUPPER_ADMIN_EMAIL}
+  password: ${SUPPER_ADMIN_PASSWORD}

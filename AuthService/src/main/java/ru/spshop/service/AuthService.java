@@ -1,66 +1,81 @@
-package ru.spshop.services;
+package ru.spshop.service;
 
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.spshop.dto.JwtRequest;
 import ru.spshop.dto.JwtAuthResponse;
-import ru.spshop.model.JwtAuthentication;
+import ru.spshop.dto.UserDTO;
+import ru.spshop.model.AuthUser;
+import ru.spshop.model.User;
+import ru.spshop.service.jwt.JwtProvider;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
     private Map<String, String> refreshStorage = new HashMap<>();
-    @Autowired
-    private JwtProvider jwtProvider;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
 
-    //private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    @Value("${jwt.lifetime.refresh}")
+    private Integer lifetimeRefreshToken;
 
-    public JwtAuthResponse login(@NonNull JwtRequest authRequest) throws AuthException {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    authRequest.getUsername(),
-                    authRequest.getPassword()));
-        } catch (BadCredentialsException e) {
-            throw new AuthException("Incorrect username or password");
-        }
-        UserDetails userDetail = userService.loadUserByUsername(authRequest.getUsername());
+    public JwtAuthResponse login(UserDTO request, HttpServletResponse response) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                request.email(),
+                request.password()));
+        User user = userService.getUserByEmail(request.email());
+        UserDetails userDetail = new AuthUser(user);
 
         final String accessToken = jwtProvider.generateAccessToken(userDetail);
-        //log.info("accessToken------" + accessToken);
         final String refreshToken = jwtProvider.generateRefreshToken(userDetail);
-        //log.info("refreshToken------" + refreshToken);
-        refreshStorage.put(userDetail.getUsername(), refreshToken);
-        return new JwtAuthResponse(accessToken, refreshToken);
+        refreshStorage.put(user.getEmail(), refreshToken);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+//                .secure(true) // only HTTPS
+                .path("/v1/users")
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(lifetimeRefreshToken))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return new JwtAuthResponse(accessToken, null);
+    }
+
+    public void logout(HttpServletResponse response){
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/v1/users")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
 
-    public JwtAuthResponse getAccessToken(@NonNull String refreshToken) throws AuthException {
+    public JwtAuthResponse getAccessToken(String refreshToken) {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-
-                UserDetails userDetail = userService.loadUserByUsername(login);
-
+                User user = userService.getUserByEmail(login);
+                UserDetails userDetail = new AuthUser(user);
                 final String accessToken = jwtProvider.generateAccessToken(userDetail);
+//                final String newRefreshToken = jwtProvider.generateRefreshToken(userDetail);
                 return new JwtAuthResponse(accessToken, null);
             }
         }
@@ -75,7 +90,8 @@ public class AuthService {
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
 
-                UserDetails userDetail = userService.loadUserByUsername(login);
+                User user = userService.getUserByEmail(login);
+                UserDetails userDetail = new AuthUser(user);
 
                 final String accessToken = jwtProvider.generateAccessToken(userDetail);
                 final String newRefreshToken = jwtProvider.generateRefreshToken(userDetail);
@@ -84,11 +100,6 @@ public class AuthService {
             }
         }
         throw new AuthException("Невалидный JWT токен");
-    }
-
-
-    public JwtAuthentication getAuthInfo() {
-        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
     }
 
 }
