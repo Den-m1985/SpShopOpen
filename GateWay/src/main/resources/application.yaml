@@ -17,10 +17,10 @@ spring:
             - StripPrefix=1
             - PrefixPath=/ru-spshop-auth
         #----------------------------
-        - id: ${ROUTES_RESOUSCE_SERVICE_ID}
-          uri: ${ROUTES_RESOUSCE_SERVICE_URI}
+        - id: ${ROUTES_RESOURCE_SERVICE_ID}
+          uri: ${ROUTES_RESOURCE_SERVICE_URI}
           predicates:
-            - ${ROUTES_RESOUSCE_SERVICE_PREDICATE}
+            - ${ROUTES_RESOURCE_SERVICE_PREDICATE}
           filters:
             - StripPrefix=1
             - PrefixPath=/ru-spshop-resource
