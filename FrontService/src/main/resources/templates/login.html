@@ -55,7 +55,9 @@
     </div>
 
 
-    <script>
+    <script th:inline="javascript">
+        const BASE_API_URL = [[${ baseApiUrl }]];
+
         function loginUser() {
             var loginData = {
                 email: document.getElementsByName("username")[0].value,
@@ -66,56 +68,34 @@
             buttonContent.style.display = 'none';
             loadingSpinner.style.display = 'inline-block';
 
-            //fetch('https://закупайумно.рф/auth/api/login', {
-            fetch('http://localhost:8765/auth/v1/users/login', {
+            fetch(BASE_API_URL + '/auth/v1/users/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(loginData)
             })
-                .then(response => {
-                    // если пользователь не найден
-                    if (response.status === 500) {
-                        document.getElementById("login-error").style.display = "block";
+                .then(async response => {
+                    if (response.status >= 400) {
+                        const errorData = await response.json();
+                        const errorMsg = errorData?.detail || "Неизвестная ошибка сервера";
+                        document.getElementById("server-error").textContent = errorMsg;
+                        document.getElementById("server-error").style.display = "block";
                         changeButton();
-                        return false;
+                        return null;
                     } else {
                         return response.json();
                     }
                 })
                 .then(data => {
-                    console.log("data " + data)
                     if (!data) {
                         return false;
                     }
-                    // Извлечение токена из данных ответа
-                    const token = data.accessToken;
-                    localStorage.setItem('accessToken', token);
-                    localStorage.setItem('refreshToken', data.refreshToken);
-
-                    // Декодирование JWT токена
-                    const base64Url = token.split('.')[1];
-                    const base64 = base64Url.replace('-', '+').replace('_', '/');
-                    // decode with Cirilic
-                    const decoder = new TextDecoder('utf-8');
-                    const decodedBase64 = decoder.decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
-                    const decodedPayload = JSON.parse(decodedBase64);
-                    //const decodedPayload = JSON.parse(window.atob(base64));
-                    //console.log('decodedPayload ' + decodedPayload)
-                    const username = JSON.stringify(decodedPayload);
-                    const parsedPayload = JSON.parse(username);
-                    const subValue = parsedPayload.sub;
-
-                    // Сохранение имени пользователя в локальное хранилище
-                    localStorage.setItem('username', subValue);
-                    console.log('username ' + subValue)
-                    // Перенаправляем на домашнюю страницу
+                    sessionStorage.setItem('accessToken', data.accessToken);
                     window.location.href = "/";
                 })
                 .catch(error => {
-                    // Обработка ошибки
-                    //throw new Error('ошибка');
                     document.getElementById("server-error").style.display = "block";
                     changeButton();
                 });

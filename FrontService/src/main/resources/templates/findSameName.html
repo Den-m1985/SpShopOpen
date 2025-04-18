@@ -71,7 +71,9 @@
     </div>
   </div>
 
-  <script>
+  <script th:inline="javascript">
+    const BASE_API_URL = [[${baseApiUrl}]];
+
     document.addEventListener("DOMContentLoaded", function () {
       if (isAccessTokenExpired()) {
         if (!updateAccessToken()) {
@@ -114,7 +116,8 @@
     });
 
     function isAccessTokenExpired() {
-      const accessToken = localStorage.getItem('accessToken');
+      //const accessToken = localStorage.getItem('accessToken');
+      const accessToken = sessionStorage.getItem('accessToken');
       if (accessToken === null || accessToken === "null" || accessToken === undefined) {
         // Токен не существует, считаем, что он истек
         //console.log("Токен не существует");
@@ -132,30 +135,20 @@
       }
     }
     function updateAccessToken() {
-      // Получение refreshToken из localStorage
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
-        return false;
-      }
       // Отправка запроса на обновление токена
-      fetch('https://закупайумно.рф/auth/api/token', {
-        //fetch('http://localhost:8765/auth/api/token', {
+      fetch(BASE_API_URL + '/auth/v1/users/token', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ refreshToken })
+        }
       })
         .then(response => response.json())
         .then(data => {
-          // если от сервера приходит null
           if (data.accessToken != null) {
-            // Сохранение нового accessToken
-            localStorage.setItem('accessToken', data.accessToken);
-            //console.log("обновлен access token")
+            sessionStorage.setItem('accessToken', data.accessToken);
             return true;
           } else {
-            //console.log("access token = null")
             return false;
           }
         })
@@ -263,12 +256,11 @@
       const formData = new FormData();
       formData.append("file1", file1);
       formData.append("file2", file2);
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = sessionStorage.getItem('accessToken');
       buttonContent.style.display = "none";
       loadingSpinner.style.display = "inline-block";
       let filename; // Declare filename variable outside the first then() block
-      //fetch("https://закупайумно.рф/resource/service/findSameName", {
-      fetch('http://localhost:8765/resource/service/findSameName', {
+      fetch(BASE_API_URL + '/resource/service/findSameName', {
         method: "POST",
         headers: {
           Authorization: "Bearer " + accessToken,

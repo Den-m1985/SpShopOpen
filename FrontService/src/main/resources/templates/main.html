@@ -68,22 +68,20 @@
         </div>
     </footer>
     -->
-    <script>
+    <script th:inline="javascript">
+        const BASE_API_URL = [[${baseApiUrl}]];
+
         document.addEventListener('DOMContentLoaded', function () {
             if (isAccessTokenExpired()) {
                 console.log('access token истек');
                 updateAccessToken();
             } else {
                 console.log('access token действителен');
-                var username = localStorage.getItem('username');
-                // Если есть данные, заменяем содержимое элемента на имя пользователя
-                if (username) {
-                    document.getElementById('usernamePlaceholder').innerText = username;
-                }
+                    document.getElementById('usernamePlaceholder').innerText = "АККАУНТ";
             }
         })
         function isAccessTokenExpired() {
-            const accessToken = localStorage.getItem('accessToken');
+            const accessToken = sessionStorage.getItem('accessToken');
             //console.log("accessToken " + accessToken);
             if (accessToken === null || accessToken === "null" || accessToken === undefined) {
                 // Токен не существует, считаем, что он истек
@@ -105,30 +103,20 @@
         }
 
         function updateAccessToken() {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken === null || refreshToken === "null" || refreshToken === undefined) {
-                //console.log("отсутствует refresh token")
-                return false;
-            }
-            // Отправка запроса на обновление токена
-            fetch('https://закупайумно.рф/auth/api/token', {
-                //fetch('http://localhost:8765/auth/api/token', {
+            fetch(BASE_API_URL + '/auth/v1/users/token', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ refreshToken })
+                }
             })
                 .then(response => response.json())
                 .then(data => {
                     // если от сервера приходит null
                     if (data.accessToken != null) {
-                        // Сохранение нового accessToken
-                        localStorage.setItem('accessToken', data.accessToken);
-                        //console.log("обновлен access token")
+                        sessionStorage.setItem('accessToken', data.accessToken);
                         return true;
                     } else {
-                        //console.log("access token = null")
                         return false;
                     }
                 })

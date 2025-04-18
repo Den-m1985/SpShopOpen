@@ -46,8 +46,8 @@ public class AuthService {
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-//                .secure(true) // only HTTPS
-                .path("/v1/users")
+                .secure(false) // only HTTPS
+                .path("/")
                 .sameSite("Strict")
                 .maxAge(Duration.ofDays(lifetimeRefreshToken))
                 .build();
@@ -59,7 +59,7 @@ public class AuthService {
     public void logout(HttpServletResponse response){
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .path("/v1/users")
+                .path("/")
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
