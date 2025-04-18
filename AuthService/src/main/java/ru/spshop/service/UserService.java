@@ -3,10 +3,12 @@ package ru.spshop.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.spshop.bootstrap.RoleSeeder;
 import ru.spshop.dto.ChangeUserRoleDto;
 import ru.spshop.dto.UserBlockDto;
+import ru.spshop.dto.UserInfoDto;
 import ru.spshop.model.Role;
 import ru.spshop.model.User;
 import ru.spshop.model.enums.RoleEnum;
@@ -64,4 +66,15 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public UserInfoDto getUserInfo(String email) {
+        User user = getUserByEmail(email);
+        return new UserInfoDto(
+                user.getFirstName(),
+                user.getMiddleName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getGender(),
+                user.getRole().getName().toString()
+        );
+    }
 }

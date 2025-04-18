@@ -1,11 +1,19 @@
 package ru.spshop.controllers;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/")
 public class ShopController {
+
+    @ModelAttribute
+    public void addBaseApiUrl(Model model) {
+        model.addAttribute("baseApiUrl", System.getProperty("BASE_API_URL"));
+    }
 
     @GetMapping
     public String getMainPage() {
