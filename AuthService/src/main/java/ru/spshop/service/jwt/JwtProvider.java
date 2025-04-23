@@ -67,6 +67,26 @@ public class JwtProvider {
                 .compact();
     }
 
+    // for test only
+    public String generateTestToken(@NonNull UserDetails user) {
+        final LocalDateTime now = LocalDateTime.now();
+        final Instant testExpirationInstant = now.plusSeconds(1).atZone(ZoneId.systemDefault()).toInstant();
+        final Date testExpiration = Date.from(testExpirationInstant);
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .setExpiration(testExpiration)
+                .signWith(jwtAccessSecret)
+                .compact();
+    }
+
+    // for test
+    public void parseClaimToken(@NonNull String token) {
+        Jwts.parserBuilder()
+                .setSigningKey(jwtAccessSecret)
+                .build()
+                .parseClaimsJws(token);
+    }
+
     public boolean validateAccessToken(@NonNull String accessToken) {
         return validateToken(accessToken, jwtAccessSecret);
     }
@@ -130,7 +150,7 @@ public class JwtProvider {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
