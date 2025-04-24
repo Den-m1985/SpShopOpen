@@ -28,3 +28,7 @@ cd src/main/resources/certs
 
 
 https://github.com/Den-m1985/WebMarket.git
+
+
+### Swagger доступен по адресу:
+http://localhost:8000/ru-spshop-auth/swagger-ui.html
