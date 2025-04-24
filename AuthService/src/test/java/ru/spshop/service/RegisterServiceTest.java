@@ -1,6 +1,7 @@
 package ru.spshop.service;
 
 import jakarta.persistence.EntityExistsException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -31,6 +33,8 @@ public class RegisterServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    private final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+
     private String email = "john.doe@example.com";
     private String password = "password";
 
@@ -42,7 +46,7 @@ public class RegisterServiceTest {
     @Test
     public void shouldRegisterNewUserAndReturnJwtToken() {
         UserDTO request = new UserDTO(email, password);
-        AuthResponse response = registerService.registerUser(request);
+        AuthResponse response = registerService.registerUser(request, servletResponse);
 
         assertNotNull(response);
         assertNotNull(response.accessToken());
@@ -65,6 +69,6 @@ public class RegisterServiceTest {
 
         UserDTO request = new UserDTO(email, password);
 
-        assertThrows(EntityExistsException.class, () -> registerService.registerUser(request));
+        assertThrows(EntityExistsException.class, () -> registerService.registerUser(request, servletResponse));
     }
 }
