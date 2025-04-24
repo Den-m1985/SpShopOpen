@@ -1,6 +1,7 @@
 package ru.spshop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import ru.spshop.dto.UserDTO;
 import ru.spshop.repositories.UserRepository;
 import ru.spshop.service.RegisterService;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +34,8 @@ public class TestControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+
     private final String email = "john.doe@example.com";
     private final String password = "password";
     private final String baseEndpoint = "/tests";
@@ -40,7 +44,7 @@ public class TestControllerTest {
     void setUp() {
         userRepository.deleteAll();
         UserDTO request = new UserDTO(email, password);
-        registerService.registerUser(request);
+        registerService.registerUser(request, servletResponse);
     }
 
     @Test

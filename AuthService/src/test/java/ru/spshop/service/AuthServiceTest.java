@@ -34,7 +34,7 @@ public class AuthServiceTest {
     void setUp() {
         userRepository.deleteAll();
         UserDTO request = new UserDTO(email, password);
-        registerService.registerUser(request);
+        registerService.registerUser(request, servletResponse);
     }
 
     @Test
