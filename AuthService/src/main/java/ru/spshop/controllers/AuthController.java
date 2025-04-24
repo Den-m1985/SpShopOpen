@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.spshop.controllers.inrerfaces.AuthApi;
 import ru.spshop.dto.AuthResponse;
 import ru.spshop.dto.JwtAuthResponse;
 import ru.spshop.dto.RefreshJwtRequest;
@@ -26,7 +27,7 @@ import ru.spshop.service.UserService;
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
     private final RegisterService registerService;
     private final AuthService authService;
     private final UserService userService;
