@@ -1,6 +1,7 @@
 package ru.spshop.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -75,11 +76,10 @@ public class AuthService {
                 User user = userService.getUserByEmail(login);
                 UserDetails userDetail = new AuthUser(user);
                 final String accessToken = jwtProvider.generateAccessToken(userDetail);
-//                final String newRefreshToken = jwtProvider.generateRefreshToken(userDetail);
                 return new JwtAuthResponse(accessToken, null);
             }
         }
-        return new JwtAuthResponse(null, null);
+        throw new SignatureException("invalid token");
     }
 
 
